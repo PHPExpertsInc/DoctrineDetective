@@ -1,0 +1,8 @@
+services:
+  doctrinedetective.query_listener:
+    class: PHPExperts\DoctrineDetectiveBundle\EventListener\QueryListener
+    arguments: [@doctrine.orm.entity_manager]
+    tags:
+      - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+      - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+
