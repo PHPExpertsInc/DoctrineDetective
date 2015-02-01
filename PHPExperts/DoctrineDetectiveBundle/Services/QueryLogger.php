@@ -10,6 +10,7 @@ class QueryLogger implements \Doctrine\DBAL\Logging\SQLLogger
     protected $serviceName;
     protected $methodName;
     protected $queryId;
+    protected $lineNumber = -1;
 
     protected $requestStartTime = 0;
     protected $queryStartTime = 0;
@@ -36,17 +37,32 @@ class QueryLogger implements \Doctrine\DBAL\Logging\SQLLogger
     public function startQuery($sql, array $params = null, array $types = null)
     {
         $backtrace = debug_backtrace();
-        foreach ($backtrace as $trace) {
-            if (isset($trace['class']) && substr($trace['class'], -7) === 'Service') {
+        $previousTrace = [];
+        foreach ($backtrace as $idx => $trace) {
+            if (isset($previousTrace['class']) && $previousTrace['class'] === 'Doctrine\\DBAL\\Statement') {
                 $this->serviceName = substr($trace['class'], strrpos($trace['class'], '\\'));
                 $this->methodName = $trace['function'];
+                $this->lineNumber = $previousTrace['line'];
+                break;
             }
-        }
-//        exit;
-        $this->queryStartTime = microtime(true);
-        $this->queryId = count(self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries']);
-        $sql = $this->interpolateQuery($sql, $params);
+            else if (isset($trace['class']) && substr($trace['class'], -7) === 'Service') {
+                $this->serviceName = substr($trace['class'], strrpos($trace['class'], '\\'));
+                $this->methodName = $trace['function'];
 
+                $this->lineNumber = -1;
+                if (isset($backtrace[$idx - 1]['line'])) {
+                    $this->lineNumber = $backtrace[$idx - 1]['line'];
+                }
+                break;
+            }
+
+            $previousTrace = $trace;
+        }
+
+        $this->queryStartTime = microtime(true);
+        if (!isset(self::$requests[$this->requestId]['time'])) {
+            self::$requests[$this->requestId]['time'] = 0;
+        }
         if (!isset(self::$requests[$this->requestId][$this->serviceName]['time'])) {
             self::$requests[$this->requestId][$this->serviceName]['time'] = 0;
         }
@@ -55,6 +71,13 @@ class QueryLogger implements \Doctrine\DBAL\Logging\SQLLogger
             self::$requests[$this->requestId][$this->serviceName][$this->methodName]['time'] = 0;
         }
 
+        if (empty(self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries'])) {
+            $this->queryId = 0;
+        } else {
+            $this->queryId = count(self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries']);
+        }
+        $sql = $this->interpolateQuery($sql, $params);
+
         self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries'][$this->queryId] = [
             'query' => $sql,
         ];
@@ -62,7 +85,7 @@ class QueryLogger implements \Doctrine\DBAL\Logging\SQLLogger
 
     /**
      * Marks the last started query as stopped. This can be used for timing of queries.
-     *
+     *d
      * @return void
      */
     public function stopQuery()
@@ -73,6 +96,7 @@ class QueryLogger implements \Doctrine\DBAL\Logging\SQLLogger
         self::$requests[$this->requestId]['time'] = $totalRequestTime;
         self::$requests[$this->requestId][$this->serviceName]['time'] += $totalQueryTime;
         self::$requests[$this->requestId][$this->serviceName][$this->methodName]['time'] += $totalQueryTime;
+        self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries'][$this->queryId]['line'] = $this->lineNumber;
         self::$requests[$this->requestId][$this->serviceName][$this->methodName]['queries'][$this->queryId]['time'] = $totalQueryTime;
     }
 
