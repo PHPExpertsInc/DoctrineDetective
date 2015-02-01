@@ -1,0 +1,31 @@
+{
+    "name": "phpexpertsinc/doctrine-detective",
+    "description": "A Symfony2 Bundle that provides a detailed SQL query log for both HTML and JSON responses, including the SQL query, its location, and duration, organized by Controller -> Service -> Repository.",
+    "require": {
+        "php": "5.4.0",
+        "symfony/http-kernel": "2.*",
+        "symfony/dependency-injection": "2.*",
+        "doctrine/orm": "*",
+        "doctrine/doctrine-bundle": "*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Theodore R. Smith",
+            "email": "theodore@phpexperts.pro"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "PHPExperts\\DoctrineDetectiveBundle\\": ""
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:phpexpertsinc/DoctrineDetective.git",
+        }
+    ]
+}
+
