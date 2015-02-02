@@ -16,8 +16,8 @@ them against the database.
 
 ## Installation
 
-0. Add `"phpexpertsinc/DoctrineDetective" : "1.0.0"` to your *composer.json*.
-1. Run `$ composer install`.
+0. Add `"phpexpertsinc/doctrine-detective" : "1.*"` to your *composer.json*.
+1. Run `$ composer update phpexpertsinc/doctrine-detective`.
 2. Edit `app/appKernel.php`.
 3. Add `new PHPExperts\DoctrineDetectiveBundle\DoctrineDetectiveBundle(),` to
 the `AppKernel::registerBundles()` array. -or- (**prefered**), add it to just
