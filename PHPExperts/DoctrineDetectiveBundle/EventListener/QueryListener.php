@@ -23,14 +23,6 @@ class QueryListener
     protected function getRequestActionName($request)
     {
         return $request->attributes->get('_controller');
-//        $actionParams = explode('::', $request->attributes->get('_controller'));
-//
-//        // Strip the word 'Controller' from the controller name.
-//        $controllerName = substr($actionParams[0], 0, -10);
-//        // Strip the word 'Action' from the action name.
-//        $actionName = substr($actionParams[1], 0, -6);
-//
-//        return "$controllerName::$actionName";
     }
 
     public function onKernelController(FilterControllerEvent $event)
@@ -61,7 +53,5 @@ class QueryListener
         $content = json_decode($response->getContent(), true) + [ 'sqlLog' => $sqlLog ];
         $response->setContent(json_encode($content));
         $event->setResponse($response);
-
-        $foo = 1;
     }
 }
